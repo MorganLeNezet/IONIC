@@ -2,55 +2,36 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>Blank</ion-title>
+        <ion-title>Ma petite to do list</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Blank</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <div id="container">
-        <strong>Ready to create an app?</strong>
-        <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-      </div>
+      <AddTask @add-task="addTask" />
+      <TaskList :tasks="tasks" @remove-task="removeTask" @view-task="viewTask" />
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import AddTask from '@/components/AddTask.vue';
+import TaskList from '@/components/TaskList.vue';
+
+const router = useRouter();
+const tasks = ref<{ title: string, description: string }[]>([]);
+
+const addTask = (task: { title: string, description: string }) => {
+  tasks.value.push(task);
+};
+
+const removeTask = (index: number) => {
+  tasks.value.splice(index, 1);
+};
+
+const viewTask = (task: { title: string, description: string }) => {
+  router.push({ name: 'TaskDetail', params: { task } });
+};
 </script>
-
-<style scoped>
-#container {
-  text-align: center;
-  
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-  
-  color: #8c8c8c;
-  
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
-</style>
