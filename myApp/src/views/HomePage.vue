@@ -18,7 +18,6 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import AddTask from '@/components/AddTask.vue';
-import TaskList from '@/components/TaskList.vue';
 
 const router = useRouter();
 const tasks = ref<{ title: string, description: string }[]>([]);
@@ -32,6 +31,6 @@ const removeTask = (index: number) => {
 };
 
 const viewTask = (task: { title: string, description: string }) => {
-  router.push({ name: 'TaskDetail', params: { task } });
+  router.push({ name: 'TaskDetail', params: { task: JSON.stringify(task) } });
 };
 </script>

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import HomePage from '../views/HomePage.vue';
 import AddEditTask from '../views/AddEditTask.vue';
-import TaskDetail from '../views.TaskDetail.vue';
+import TaskDetail from '../views/TaskDetail.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
