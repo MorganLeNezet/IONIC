@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue';
+import { ref } from '@vue/reactivity';
 import { IonItem, IonInput, IonButton } from '@ionic/vue';
 
 const newTask = ref<string>('');
