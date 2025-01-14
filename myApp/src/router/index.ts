@@ -3,6 +3,8 @@ import { RouteRecordRaw } from 'vue-router';
 import HomePage from '@/views/HomePage.vue';
 import AddEditTask from '@/views/AddEditTask.vue';
 import TaskDetail from '@/views/TaskDetail.vue';
+import LoginPage from '@/views/LoginUser.vue';
+import RegisterPage from '@/views/RegistrationUser.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Home',
     component: HomePage
   },
+  { path: '/register',
+     name: 'Register',
+      component: RegisterPage
+ },
+  { path: '/login', name: 'Login', component: LoginPage },
   {
     path: '/add',
     name: 'AddTask',
