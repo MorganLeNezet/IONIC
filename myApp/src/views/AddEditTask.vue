@@ -54,39 +54,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from '@vue/reactivity';
+import { ref } from '@vue/reactivity';
+import { computed, onMounted } from '@vue/runtime-core';
 import { useRouter, useRoute } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength, maxLength } from '@vuelidate/validators';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonButton,
-  IonButtons,
-  IonBackButton,
-  IonNote,
-  IonDatetime,
-  IonSelect,
-  IonSelectOption
-} from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonButtons, IonBackButton, IonNote, IonDatetime, IonSelect, IonSelectOption } from '@ionic/vue';
+import { addTask, updateTask } from '@/services/taskServices';
 
 const router = useRouter();
 const route = useRoute();
 
-const task = ref<{ title: string; id: number; dueDate: string; category: string; status: string }>(
-  route.params.task
-    ? JSON.parse(route.params.task as string)
-    : { title: '', id: Date.now(), dueDate: '', category: '', status: 'À faire' }
-);
+const task = ref({ title: '', id: '', dueDate: '', category: '', status: 'À faire' });
 
 const taskIndex = route.params.index ? parseInt(route.params.index as string) : -1;
 const isEditing = computed(() => taskIndex !== -1);
@@ -103,32 +82,25 @@ const rules = {
 
 const v$ = useVuelidate(rules, { task });
 
+onMounted(() => {
+  if (route.params.task && route.params.index) {
+    const parsedTask = JSON.parse(route.params.task as string);
+    task.value = parsedTask;
+  }
+});
+
 const saveTask = async () => {
   const isValid = await v$.value.$validate();
   if (!isValid) {
     return;
   }
 
-  const updatedTask = {
-    id: task.value.id,
-    title: task.value.title.trim(),
-    dueDate: task.value.dueDate,
-    category: task.value.category,
-    status: task.value.status
-  };
+  if (isEditing.value) {
+    await updateTask(task.value.id, task.value);
+  } else {
+    await addTask(task.value);
+  }
 
-  router.push({
-    name: 'Home',
-    params: {
-      updatedTask: JSON.stringify(updatedTask),
-      taskIndex: taskIndex.toString()
-    }
-  });
+  router.push({ name: 'Home' });
 };
 </script>
-
-<style scoped>
-.ion-invalid {
-  --highlight-color: var(--ion-color-danger);
-}
-</style>

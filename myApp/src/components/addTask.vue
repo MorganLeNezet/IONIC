@@ -44,4 +44,3 @@ const addTask = async () => {
   v$.value.$reset();
 };
 </script>
-

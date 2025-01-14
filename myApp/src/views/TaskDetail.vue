@@ -34,7 +34,7 @@ import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
-const task = ref<{ title: string; id: number; dueDate: string; category: string; status: string }>(JSON.parse(route.params.task as string));
+const task = ref<{ title: string; id: string; dueDate: string; category: string; status: string }>(JSON.parse(route.params.task as string));
 const taskIndex = route.params.index;
 
 const editTask = () => {

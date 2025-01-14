@@ -35,14 +35,14 @@ const routes: Array<RouteRecordRaw> = [
     path: '/detail/:task',
     name: 'TaskDetail',
     component: TaskDetail,
-    beforeEnter: (to,from, next) => {
+    beforeEnter: (to, from, next) => {
       if (to.params.task) {
         next();
       } else {
         next('/home');
       }
     }
-  }
+  },
 ];
 
 const router = createRouter({

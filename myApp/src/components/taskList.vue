@@ -1,7 +1,7 @@
 <template>
   <ion-list>
-    <ion-item-sliding v-for="(task, index) in tasks" :key="index">
-      <ion-item @click="viewTask(task, index)" :class="{ 'overdue': isOverdue(task.dueDate) }">
+    <ion-item-sliding v-for="(task, index) in tasks" :key="task.id">
+      <ion-item @click="viewTask(task)">
         <ion-label>
           <h2>{{ task.title }}</h2>
           <p>Catégorie: {{ task.category }}</p>
@@ -10,7 +10,7 @@
         </ion-label>
       </ion-item>
       <ion-item-options side="end">
-        <ion-item-option color="danger" @click="presentAlert(index)">Delete</ion-item-option>
+        <ion-item-option color="danger" @click="presentAlert(task.id)">Delete</ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
   </ion-list>
@@ -28,49 +28,39 @@
 <script setup lang="ts">
 import { ref } from '@vue/reactivity';
 import { IonList, IonItem, IonItemSliding, IonItemOptions, IonItemOption, IonAlert } from '@ionic/vue';
+import { Task } from '@/model/types';
 
 const props = defineProps<{
-  tasks: { title: string; id: number; dueDate: string; category: string; status: string }[];
+  tasks: Task[];
 }>();
 
 const emit = defineEmits<{
-  (e: 'delete-task', index: number): void;
-  (e: 'view-task', task: { title: string; id: number; dueDate: string; category: string; status: string }, index: number): void;
+  (e: 'delete-task', id: string): void;
+  (e: 'view-task', task: Task): void;
 }>();
 
 const showAlert = ref(false);
-const taskIndex = ref<number | null>(null);
+const taskId = ref<string | null>(null);
 
-const presentAlert = (index: number) => {
-  taskIndex.value = index;
+const presentAlert = (id: string) => {
+  taskId.value = id;
   showAlert.value = true;
 };
 
 const closeAlert = () => {
   showAlert.value = false;
-  taskIndex.value = null;
+  taskId.value = null;
 };
 
 const deleteTask = () => {
-  if (taskIndex.value !== null) {
-    emit('delete-task', taskIndex.value);
-    taskIndex.value = null;
+  if (taskId.value !== null) {
+    emit('delete-task', taskId.value);
+    taskId.value = null;
     showAlert.value = false;
   }
 };
 
-const viewTask = (task: { title: string; id: number; dueDate: string; category: string; status: string }, index: number) => {
-  emit('view-task', task, index);
-};
-
-const isOverdue = (dueDate: string) => {
-  const today = new Date().toISOString().split('T')[0];
-  return dueDate && dueDate < today;
+const viewTask = (task: Task) => {
+  emit('view-task', task);
 };
 </script>
-
-<style scoped>
-.overdue {
-  --background: #ffcccc;
-}
-</style>
