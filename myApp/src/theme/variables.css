@@ -1,2 +1,9 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+
+.ion-invalid {
+  --highlight-color: var(--ion-color-danger);
+}
+.validation-error {
+  padding: 4px 16px;
+}
