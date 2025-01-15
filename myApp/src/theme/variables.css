@@ -7,3 +7,29 @@ http://ionicframework.com/docs/theming/ */
 .validation-error {
   padding: 4px 16px;
 }
+
+.has-error {
+  --border-color: var(--ion-color-danger);
+}
+
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.8rem;
+  margin: 4px 16px;
+}
+
+ion-button {
+  margin-top: 16px;
+}
+
+ion-grid {
+  padding: 10px;
+}
+
+.audio-button {
+  font-size: 2rem;
+}
+
+ion-item-sliding {
+  margin-bottom: 4px;
+}

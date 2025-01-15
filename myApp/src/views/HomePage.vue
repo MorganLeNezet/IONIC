@@ -93,9 +93,3 @@ onMounted(() => {
     </ion-content>
   </ion-page>
 </template>
-
-<style scoped>
-ion-grid {
-  padding: 10px;
-}
-</style>

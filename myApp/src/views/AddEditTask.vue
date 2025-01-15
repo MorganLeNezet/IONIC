@@ -113,6 +113,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from '@vue/reactivity';
+import { onMounted } from '@vue/runtime-core';
 import { useRouter, useRoute } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength, maxLength } from '@vuelidate/validators';
@@ -161,11 +162,33 @@ const rules = {
 
 const v$ = useVuelidate(rules, { task });
 
-if (route.params.task) {
-  const parsedTask = JSON.parse(route.params.task as string);
-  task.value = parsedTask;
-  taskId.value = parsedTask.id;
-}
+onMounted(() => {
+  if (route.params.task) {
+    const parsedTask = JSON.parse(route.params.task as string);
+    task.value = parsedTask;
+    taskId.value = parsedTask.id;
+    
+    // Set audio URL if task has audioData
+    if (parsedTask.audioData) {
+      try {
+        // Convert base64 to array buffer
+        const binaryString = window.atob(parsedTask.audioData.base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Create blob and URL
+        const blob = new Blob([bytes], { type: parsedTask.audioData.mimeType });
+        audioUrl.value = URL.createObjectURL(blob);
+        
+        console.log('Audio URL created:', audioUrl.value);
+      } catch (error) {
+        console.error('Error creating audio URL:', error);
+      }
+    }
+  }
+});
 
 const handleRecording = async () => {
   try {
@@ -195,11 +218,22 @@ const handleRecording = async () => {
 };
 
 
-const deleteAudio = () => {
-  audioUrl.value = null;
-  task.value.audioData = undefined;
-};
+const deleteAudio = async () => {
+  try {
+    audioUrl.value = null;
+    const { audioData, ...cleanTask } = task.value;
+    task.value = cleanTask;
 
+    if (isEditing.value && taskId.value) {
+      await updateTask(taskId.value, {
+        ...cleanTask,
+        audioData: null
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting audio:', error);
+  }
+};
 const handleSubmit = async () => {
   const isValid = await v$.value.$validate();
   if (!isValid) return;
@@ -219,19 +253,3 @@ const handleSubmit = async () => {
   }
 };
 </script>
-
-<style scoped>
-.has-error {
-  --border-color: var(--ion-color-danger);
-}
-
-.error-message {
-  color: var(--ion-color-danger);
-  font-size: 0.8rem;
-  margin: 4px 16px;
-}
-
-ion-button {
-  margin-top: 16px;
-}
-</style>

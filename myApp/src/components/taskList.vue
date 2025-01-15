@@ -1,35 +1,37 @@
 <template>
   <ion-list>
     <ion-item-sliding v-for="task in tasks" :key="task.id">
-      <ion-item @click="viewTask(task)">
+      <ion-item @click="emit('view-task', task)">
         <ion-label>
           <h2>{{ task.title }}</h2>
           <p>Catégorie: {{ task.category }}</p>
           <p>Statut: {{ task.status }}</p>
           <p>Date limite: {{ new Date(task.dueDate).toLocaleDateString() }}</p>
         </ion-label>
-        <ion-button 
+        <AudioPlay 
           v-if="task.audioData"
-          slot="end" 
-          fill="clear"
-          @click.stop="playAudio(task.audioData, task.id)"
-          :color="currentPlayingId === task.id ? 'danger' : 'primary'"
-          class="audio-button"
-        >
-          <ion-icon :icon="currentPlayingId === task.id ? stopCircle : playCircle"></ion-icon>
-        </ion-button>
+          :audioData="task.audioData"
+          slot="end"
+        />
       </ion-item>
+      
       <ion-item-options side="end">
-        <ion-item-option color="danger" @click="presentAlert(task.id)">Delete</ion-item-option>
+        <ion-item-option color="danger" @click="presentAlert(task.id)">
+          <ion-icon slot="icon-only" :icon="trash"></ion-icon>
+        </ion-item-option>
+        <ion-item-option @click="emit('view-task', task)">
+          <ion-icon slot="icon-only" :icon="create"></ion-icon>
+        </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
+
     <ion-alert
       :is-open="showAlert"
-      header="Confirm"
-      message="Are you sure you want to delete this task?"
-      :buttons="[ 
-        { text: 'Cancel', role: 'cancel', handler: closeAlert },
-        { text: 'Delete', handler: deleteTask }
+      header="Confirmation"
+      message="Voulez-vous vraiment supprimer cette tâche ?"
+      :buttons="[
+        { text: 'Annuler', role: 'cancel', handler: closeAlert },
+        { text: 'Supprimer', handler: deleteTask }
       ]"
     />
   </ion-list>
@@ -37,20 +39,18 @@
 
 <script setup lang="ts">
 import { ref } from '@vue/reactivity';
-import { IonList, IonItem, IonLabel, IonButton, IonIcon, IonItemSliding, IonItemOptions, IonItemOption, IonAlert } from '@ionic/vue';
-import { playCircle, stopCircle } from 'ionicons/icons';
+import { IonList, IonItem, IonLabel, IonIcon, IonItemSliding, IonItemOptions, IonItemOption, IonAlert } from '@ionic/vue';
+import { trash, create } from 'ionicons/icons';
 import { Task } from '@/model/types';
-
-const currentPlayingId = ref<string | null>(null);
-const audioElement = ref<HTMLAudioElement | null>(null);
+import AudioPlay from './AudioPlay.vue';
 
 const props = defineProps<{
-  tasks: Task[];
+  tasks: (Task & { id: string })[];
 }>();
 
 const emit = defineEmits<{
   (e: 'delete-task', id: string): void;
-  (e: 'view-task', task: Task): void;
+  (e: 'view-task', task: Task & { id: string }): void;
 }>();
 
 const showAlert = ref(false);
@@ -67,51 +67,10 @@ const closeAlert = () => {
 };
 
 const deleteTask = () => {
-  if (taskId.value !== null) {
+  if (taskId.value) {
     emit('delete-task', taskId.value);
-    taskId.value = null;
-    showAlert.value = false;
   }
-};
-
-const viewTask = (task: Task) => {
-  emit('view-task', task);
-};
-
-const playAudio = (audioData: { base64: string; mimeType: string }, taskId: string) => {
-  if (currentPlayingId.value === taskId) {
-    // Stop playing
-    if (audioElement.value) {
-      audioElement.value.pause();
-      audioElement.value = null;
-    }
-    currentPlayingId.value = null;
-  } else {
-    // Stop previous audio if playing
-    if (audioElement.value) {
-      audioElement.value.pause();
-    }
-    
-    // Play new audio
-    const audio = new Audio(`data:${audioData.mimeType};base64,${audioData.base64}`);
-    audio.onended = () => {
-      currentPlayingId.value = null;
-      audioElement.value = null;
-    };
-    audio.play();
-    audioElement.value = audio;
-    currentPlayingId.value = taskId;
-  }
+  closeAlert();
 };
 </script>
-
-<style scoped>
-.audio-button {
-  font-size: 2rem;
-}
-
-ion-item-sliding {
-  margin-bottom: 4px;
-}
-</style>
 

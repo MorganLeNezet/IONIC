@@ -7,5 +7,5 @@ export interface Task {
   audioData?: {
     base64: string;
     mimeType: string;
-  } | undefined;
+  } | null;
 }
