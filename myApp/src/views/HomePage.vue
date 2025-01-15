@@ -6,9 +6,11 @@ import TaskList from '@/components/TaskList.vue';
 import { getTasks, deleteTask } from '@/services/taskServices';
 import { onMounted } from '@vue/runtime-core';
 import { Task } from '@/model/types';
+import { auth } from '@/services/firebaseConfig';
+import { signOut } from 'firebase/auth';
 
 const router = useRouter();
-const tasks = ref<Task[]>([]);
+const tasks = ref<(Task & { id: string })[]>([]);
 
 const loadTasks = async () => {
   tasks.value = await getTasks();
@@ -19,8 +21,13 @@ const removeTask = async (id: string) => {
   loadTasks();
 };
 
-const viewTask = (task: Task) => {
-  router.push({ name: 'TaskDetail', params: { task: JSON.stringify(task) } });
+const viewTask = (task: Task & { id: string }) => {
+  router.push({ name: 'EditTask', params: { task: JSON.stringify(task) } });
+};
+
+const logout = async () => {
+  await signOut(auth);
+  router.push('/login');
 };
 
 onMounted(() => {
@@ -30,9 +37,14 @@ onMounted(() => {
 
 <template>
   <ion-page>
-    <ion-header :translucent="true">
+    <ion-header>
       <ion-toolbar>
         <ion-title>Ma petite to do list</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="logout">
+            Déconnexion
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
