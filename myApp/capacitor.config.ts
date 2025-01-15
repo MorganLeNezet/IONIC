@@ -1,14 +1,17 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'com.myapp.app',
   appName: 'myApp',
   webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+    cleartext: true,
+    allowNavigation: ['*']
+  },
   plugins: {
-    CapacitorSQLite: {
-      iosIsEncryption: false,
-      iosKeychainPrefix: 'ionic-sqlite-app',
-      androidIsEncryption: false
+    CapacitorHttp: {
+      enabled: true
     }
   }
 };

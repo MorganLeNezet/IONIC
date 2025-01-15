@@ -7,4 +7,5 @@ declare module '@/services/taskService' {
     export const getTasks: () => Promise<Task[]>;
     export const updateTask: (id: string, updatedTask: Omit<Task, 'id'>) => Promise<void>;
     export const deleteTask: (id: string) => Promise<void>;
+    export const uploadAudio: (audioBlob: Blob, taskId: string) => Promise<string>;
   }

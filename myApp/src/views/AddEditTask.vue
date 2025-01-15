@@ -58,6 +58,8 @@
             La catégorie est requise
           </div>
 
+
+          
           <!-- Status Select -->
           <ion-item :class="{ 'has-error': v$.task.status.$error }">
             <ion-label position="floating">Statut</ion-label>
@@ -74,6 +76,26 @@
             Le statut est requis
           </div>
         </ion-list>
+
+        <ion-item>
+          <ion-label position="floating">Enregistrement vocal</ion-label>
+          <ion-button 
+             @click="handleRecording" 
+            :color="isRecording ? 'danger' : 'primary'">
+          <ion-icon :icon="isRecording ? stopCircle : mic"></ion-icon>
+            {{ isRecording ? 'Stop' : 'Record' }}
+          </ion-button>
+        </ion-item>
+
+        <ion-item v-if="audioUrl">
+          <ion-label>Écouter l'enregistrement</ion-label>
+          <audio controls>
+        <source :src="audioUrl" type="audio/mp3">
+          </audio>
+       <ion-button slot="end" color="danger" @click="deleteAudio">
+        <ion-icon :icon="trash"></ion-icon>
+       </ion-button>
+      </ion-item>
 
         <div class="ion-padding">
           <ion-button 
@@ -100,17 +122,25 @@ import {
   IonButtons, IonBackButton, IonDatetime, IonSelect,
   IonSelectOption
 } from '@ionic/vue';
-import { addTask, updateTask } from '@/services/taskServices';
+import { addTask, updateTask, uploadAudio } from '@/services/taskServices';
+import { mic, stopCircle, trash } from 'ionicons/icons';
+import { initRecorder, startRecording, stopRecording } from '@/services/voiceRecorderServices';
+import { Task } from '@/model/types';
+
+
+const audioUrl = ref<string | null>(null);
 
 const router = useRouter();
 const route = useRoute();
 const isSubmitting = ref(false);
+const isRecording = ref(false);
 
-const task = ref({
+const task = ref<Task>({
   title: '',
   dueDate: new Date().toISOString(),
   category: '',
-  status: 'À faire'
+  status: 'À faire',
+  audioData: undefined
 });
 
 const taskId = ref<string | null>(null);
@@ -137,19 +167,50 @@ if (route.params.task) {
   taskId.value = parsedTask.id;
 }
 
+const handleRecording = async () => {
+  try {
+    if (!isRecording.value) {
+      const started = await startRecording();
+      isRecording.value = started;
+    } else {
+      const recordingData = await stopRecording();
+      isRecording.value = false;
+      
+      if (recordingData && recordingData.recordDataBase64) {
+        const audioData = {
+          base64: recordingData.recordDataBase64,
+          mimeType: recordingData.mimeType
+        };
+        task.value = { ...task.value, audioData };
+        
+        // Create URL for preview
+        const blob = await fetch(`data:${recordingData.mimeType};base64,${recordingData.recordDataBase64}`).then(r => r.blob());
+        audioUrl.value = URL.createObjectURL(blob);
+      }
+    }
+  } catch (error) {
+    console.error('Recording error:', error);
+    isRecording.value = false;
+  }
+};
+
+
+const deleteAudio = () => {
+  audioUrl.value = null;
+  task.value.audioData = undefined;
+};
+
 const handleSubmit = async () => {
   const isValid = await v$.value.$validate();
   if (!isValid) return;
 
   try {
     isSubmitting.value = true;
-    
     if (isEditing.value && taskId.value) {
       await updateTask(taskId.value, task.value);
     } else {
       await addTask(task.value);
     }
-    
     router.push('/home');
   } catch (error) {
     console.error('Error saving task:', error);
