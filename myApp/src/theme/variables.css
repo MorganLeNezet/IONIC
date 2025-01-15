@@ -30,6 +30,11 @@ ion-grid {
   font-size: 2rem;
 }
 
+.audio-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
 ion-item-sliding {
   margin-bottom: 4px;
 }

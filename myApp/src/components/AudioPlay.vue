@@ -27,14 +27,12 @@
   
   const playAudio = () => {
     if (isPlaying.value) {
-      // Stop playing
       if (audioElement.value) {
         audioElement.value.pause();
         audioElement.value = null;
       }
       isPlaying.value = false;
     } else {
-      // Play new audio
       const audio = new Audio(`data:${props.audioData.mimeType};base64,${props.audioData.base64}`);
       audio.onended = () => {
         isPlaying.value = false;
@@ -53,10 +51,3 @@
     }
   });
   </script>
-  
-  <style scoped>
-  .audio-button {
-    --padding-start: 8px;
-    --padding-end: 8px;
-  }
-  </style>

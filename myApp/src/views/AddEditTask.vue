@@ -123,9 +123,9 @@ import {
   IonButtons, IonBackButton, IonDatetime, IonSelect,
   IonSelectOption
 } from '@ionic/vue';
-import { addTask, updateTask, uploadAudio } from '@/services/taskServices';
+import { addTask, updateTask } from '@/services/taskServices';
 import { mic, stopCircle, trash } from 'ionicons/icons';
-import { initRecorder, startRecording, stopRecording } from '@/services/voiceRecorderServices';
+import { startRecording, stopRecording } from '@/services/voiceRecorderServices';
 import { Task } from '@/model/types';
 
 
@@ -168,17 +168,14 @@ onMounted(() => {
     task.value = parsedTask;
     taskId.value = parsedTask.id;
     
-    // Set audio URL if task has audioData
     if (parsedTask.audioData) {
       try {
-        // Convert base64 to array buffer
         const binaryString = window.atob(parsedTask.audioData.base64);
         const bytes = new Uint8Array(binaryString.length);
         for (let i = 0; i < binaryString.length; i++) {
           bytes[i] = binaryString.charCodeAt(i);
         }
         
-        // Create blob and URL
         const blob = new Blob([bytes], { type: parsedTask.audioData.mimeType });
         audioUrl.value = URL.createObjectURL(blob);
         
@@ -206,7 +203,6 @@ const handleRecording = async () => {
         };
         task.value = { ...task.value, audioData };
         
-        // Create URL for preview
         const blob = await fetch(`data:${recordingData.mimeType};base64,${recordingData.recordDataBase64}`).then(r => r.blob());
         audioUrl.value = URL.createObjectURL(blob);
       }
@@ -253,3 +249,32 @@ const handleSubmit = async () => {
   }
 };
 </script>
+
+
+<style scoped> 
+ion-item {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-top: 16px;
+  --min-height: 75px;
+  margin-bottom: 16px;
+}
+
+ion-label[position="floating"] {
+  transform: translate3d(0, -45px, 0) scale(0.85);
+  margin-bottom: 8px;
+  --color: var(--ion-color-medium);
+}
+
+ion-input, ion-select {
+  --padding-top: 16px;
+  margin-top: 8px;
+}
+
+ion-datetime {
+  --padding-top: 20px;
+  margin-top: 12px;
+  min-height: 60px;
+}
+
+</style>

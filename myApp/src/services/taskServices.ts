@@ -14,16 +14,13 @@ const addTask = async (task: Task): Promise<void> => {
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error('User not authenticated');
   
-  if (task.audioData?.base64) {
-    const sizeInMB = (task.audioData.base64.length * 0.75) / 1024 / 1024;
-    if (sizeInMB > 1) {
-      throw new Error('Audio file too large (max 1MB)');
-    }
-  }
+  const cleanTask = Object.fromEntries(
+    Object.entries(task).filter(([_, value]) => value !== undefined && value !== null)
+  );
 
   const tasksCollection = collection(db, 'users', userId, 'tasks');
   await addDoc(tasksCollection, {
-    ...task,
+    ...cleanTask,
     userId,
     createdAt: new Date().toISOString()
   });
